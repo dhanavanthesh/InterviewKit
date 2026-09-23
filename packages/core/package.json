@@ -11,6 +11,15 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@interview-kit/schema": "*"
+    "@interview-kit/logic": "*",
+    "@interview-kit/schema": "*",
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.2",
+    "groq-sdk": "^0.32.0",
+    "ipaddr.js": "^2.2.0",
+    "robots-parser": "^3.0.1",
+    "tldts": "^7.0.14",
+    "undici": "^7.16.0",
+    "zod-to-json-schema": "^3.24.6"
   }
 }

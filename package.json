@@ -21,9 +21,12 @@
     "format:check": "prettier --check .",
     "dev": "node -e \"console.log('Application development commands will be available with the web and API apps.')\"",
     "build": "npm run typecheck",
-    "fixtures": "node -e \"console.log('The local fixture server is reserved for the retrieval implementation.')\""
+    "fixtures": "tsx fixtures/sites/server.ts"
   },
   "dependencies": {
+    "@interview-kit/core": "*",
+    "@interview-kit/logic": "*",
+    "@interview-kit/schema": "*",
     "dotenv": "^17.2.2",
     "tsx": "^4.20.5"
   },
