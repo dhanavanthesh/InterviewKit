@@ -2,19 +2,31 @@
   {
     "id": "case-full",
     "jd": "Senior Backend Engineer\nRequirements\n- 5+ years of experience building TypeScript services.",
-    "company_url": "http://localhost:8099/acme/",
+    "company_url": "http://localhost:8099/normal/",
     "days": 5
   },
   {
     "id": "case-stub",
     "jd": "Frontend Engineer\nMust have production React experience.",
-    "company_url": "http://localhost:8099/stub/",
+    "company_url": "http://localhost:8099/relative/",
     "days": 1
   },
   {
-    "id": "case-vague",
+    "id": "case-take-home",
+    "jd": "Staff Platform Engineer\nRequirements\n- Must have experience designing distributed TypeScript services.\n- Strong ownership and communication skills are required.\nPreferred Qualifications\n- Kubernetes experience is a plus.",
+    "company_url": "http://localhost:8099/take-home/",
+    "days": 7
+  },
+  {
+    "id": "case-no-hiring",
+    "jd": "Compliance Software Engineer\nRequirements\n- Experience building secure backend services is required.\n- Knowledge of banking compliance is required.",
+    "company_url": "http://localhost:8099/no-hiring/",
+    "days": 3
+  },
+  {
+    "id": "case-unreachable",
     "jd": "Software Engineer\nJoin our growing team.",
-    "company_url": "https://example.com",
+    "company_url": "http://localhost:65534/unreachable/",
     "days": 60
   }
 ]
