@@ -1,0 +1,12 @@
+Software Engineer
+
+Benefits
+- Health insurance
+- Flexible holidays
+- Home office allowance
+
+Equal Opportunity
+We welcome applicants from every background and provide reasonable accommodations.
+
+Requirements
+- Required experience with TypeScript and PostgreSQL.

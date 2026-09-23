@@ -1,0 +1,15 @@
+Senior Software Engineer
+
+About the company
+We build reliable tools for teams around the world. Our culture values curiosity, care, and craftsmanship. We support flexible work and continuous learning.
+
+Responsibilities
+You will design services, review code, document decisions, and collaborate with product teams. You will participate in planning, delivery, support, and retrospectives across several product areas.
+
+Benefits
+Health coverage, learning allowance, flexible leave, home-office support, and regular team events are provided to eligible employees.
+
+Requirements
+- Strong TypeScript experience.
+- Experience operating distributed systems in production.
+- Must have experience designing idempotent payment workflows.

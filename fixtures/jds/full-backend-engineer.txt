@@ -1,0 +1,12 @@
+Senior Backend Engineer
+
+Requirements
+- 5+ years of experience building TypeScript services.
+- Strong knowledge of PostgreSQL and distributed systems.
+- You will need to communicate technical trade-offs with client stakeholders.
+
+Preferred Qualifications
+- Experience with Kubernetes is a plus.
+
+Responsibilities
+- Design reliable APIs and mentor engineers through delivery.

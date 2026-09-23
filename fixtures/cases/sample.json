@@ -1,0 +1,20 @@
+[
+  {
+    "id": "case-full",
+    "jd": "Senior Backend Engineer\nRequirements\n- 5+ years of experience building TypeScript services.",
+    "company_url": "http://localhost:8099/acme/",
+    "days": 5
+  },
+  {
+    "id": "case-stub",
+    "jd": "Frontend Engineer\nMust have production React experience.",
+    "company_url": "http://localhost:8099/stub/",
+    "days": 1
+  },
+  {
+    "id": "case-vague",
+    "jd": "Software Engineer\nJoin our growing team.",
+    "company_url": "https://example.com",
+    "days": 60
+  }
+]

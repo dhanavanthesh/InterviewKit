@@ -1,0 +1,9 @@
+Solutions Engineer
+
+Basic Qualifications
+- Required experience building Python services.
+- Ability to communicate with enterprise stakeholders.
+- Knowledge of financial reconciliation workflows.
+
+Preferred Qualifications
+- Experience with Kubernetes is desirable.
