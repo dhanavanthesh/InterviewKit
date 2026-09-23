@@ -1,0 +1,41 @@
+{
+  "name": "interview-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence-grounded interview preparation kits from job descriptions.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "scripts": {
+    "evaluate": "tsx scripts/evaluate.ts",
+    "test": "vitest run",
+    "test:api": "node -e \"console.log('API tests are reserved for the backend implementation.')\"",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "dev": "node -e \"console.log('Application development commands will be available with the web and API apps.')\"",
+    "build": "npm run typecheck",
+    "fixtures": "node -e \"console.log('The local fixture server is reserved for the retrieval implementation.')\""
+  },
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "tsx": "^4.20.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@types/node": "^20.19.13",
+    "@vitest/coverage-v8": "^3.2.7",
+    "eslint": "^9.35.0",
+    "fast-check": "^4.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0",
+    "vitest": "^3.2.7"
+  }
+}
