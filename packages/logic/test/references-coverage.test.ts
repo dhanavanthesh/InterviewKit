@@ -8,6 +8,14 @@ describe("reference validation", () => {
     expect(checkKitReferences(makeKit())).toEqual([]);
   });
 
+  it("finds a flashcard linked to a removed question", () => {
+    const kit = makeKit();
+    kit.flashcards[0]!.question_id = "missing";
+    expect(checkKitReferences(kit).map((issue) => issue.code)).toContain(
+      "UNKNOWN_FLASHCARD_QUESTION",
+    );
+  });
+
   it.each([
     ["question", "UNKNOWN_QUESTION_REQUIREMENT"],
     ["flashcard", "UNKNOWN_FLASHCARD_REQUIREMENT"],

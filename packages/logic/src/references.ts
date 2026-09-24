@@ -6,6 +6,7 @@ export type ReferenceIssueCode =
   | "DUPLICATE_FLASHCARD_ID"
   | "UNKNOWN_QUESTION_REQUIREMENT"
   | "UNKNOWN_FLASHCARD_REQUIREMENT"
+  | "UNKNOWN_FLASHCARD_QUESTION"
   | "UNKNOWN_SCHEDULE_QUESTION"
   | "SCHEDULE_DAY_COUNT"
   | "NONSEQUENTIAL_SCHEDULE_DAY";
@@ -66,6 +67,13 @@ export function checkKitReferences(kit: Kit): ReferenceIssue[] {
   });
 
   kit.flashcards.forEach((card, cardIndex) => {
+    if (card.question_id !== undefined && !questionIds.has(card.question_id)) {
+      issues.push({
+        code: "UNKNOWN_FLASHCARD_QUESTION",
+        path: `flashcards.${cardIndex}.question_id`,
+        message: `Flashcard ${card.id} references unknown question ${card.question_id}.`,
+      });
+    }
     card.requirement_ids.forEach((id, referenceIndex) => {
       if (!requirementIds.has(id)) {
         issues.push({
