@@ -2,7 +2,7 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["coverage/**", "dist/**", "node_modules/**"] },
+  { ignores: ["coverage/**", "**/dist/**", "node_modules/**", "tmp/**"] },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
@@ -23,6 +23,16 @@ export default tseslint.config(
     files: ["**/*.test.ts"],
     rules: {
       "@typescript-eslint/no-non-null-assertion": "off",
+    },
+  },
+  {
+    // Supertest intentionally exposes decoded response bodies as dynamic JSON.
+    files: ["apps/api/test/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
     },
   },
   {

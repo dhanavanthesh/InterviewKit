@@ -14,14 +14,18 @@
   "scripts": {
     "evaluate": "tsx scripts/evaluate.ts",
     "test": "vitest run",
-    "test:api": "node -e \"console.log('API tests are reserved for the backend implementation.')\"",
+    "test:api": "vitest run apps/api/test",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "dev": "node -e \"console.log('Application development commands will be available with the web and API apps.')\"",
-    "build": "npm run typecheck",
-    "fixtures": "tsx fixtures/sites/server.ts"
+    "dev": "npm run dev:api",
+    "dev:api": "npm run dev --workspace @interview-kit/api",
+    "start:api": "npm run start --workspace @interview-kit/api",
+    "build:api": "npm run build --workspace @interview-kit/api",
+    "build": "npm run typecheck && npm run build:api",
+    "fixtures": "tsx fixtures/sites/server.ts",
+    "mongo:local": "tsx scripts/local-mongo.ts"
   },
   "dependencies": {
     "@interview-kit/core": "*",
@@ -36,6 +40,7 @@
     "@vitest/coverage-v8": "^3.2.7",
     "eslint": "^9.35.0",
     "fast-check": "^4.3.0",
+    "mongodb-memory-server-core": "^11.3.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.42.0",

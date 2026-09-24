@@ -1,0 +1,30 @@
+import { defineConfig } from "tsup";
+
+export default defineConfig({
+  entry: ["src/server.ts"],
+  format: ["esm"],
+  platform: "node",
+  target: "node20",
+  clean: true,
+  splitting: false,
+  noExternal: [/^@interview-kit\//],
+  external: [
+    "bcryptjs",
+    "cheerio",
+    "cookie-parser",
+    "dotenv",
+    "express",
+    "express-rate-limit",
+    "groq-sdk",
+    "helmet",
+    "ipaddr.js",
+    "jose",
+    "mongoose",
+    "multer",
+    "robots-parser",
+    "tldts",
+    "undici",
+    "zod",
+    "zod-to-json-schema",
+  ],
+});
