@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "concurrently -k -n db,api -c gray,blue \"tsx ../../scripts/local-mongo.ts\" \"tsx ../../scripts/wait-for-port.ts 27017 && tsx watch src/server.ts\"",
     "start": "node dist/server.js",
     "build": "tsup",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "dev:server": "tsx watch src/server.ts"
   },
   "dependencies": {
     "@interview-kit/core": "*",
