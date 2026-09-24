@@ -63,6 +63,28 @@ describe("authentication", () => {
     expect((await agent.get("/api/auth/me")).body.error.code).toBe("UNAUTHENTICATED");
   });
 
+  it("throttles credential attempts but never the session check on page loads", async () => {
+    const { app } = testContext();
+    const agent = request.agent(app);
+    await agent
+      .post("/api/auth/register")
+      .send({ email: "busy@example.com", password: "secure-password" });
+    for (let visit = 0; visit < 30; visit += 1) {
+      expect((await agent.get("/api/auth/me")).status).toBe(200);
+    }
+    const attempts = [];
+    for (let attempt = 0; attempt < 21; attempt += 1) {
+      attempts.push(
+        (
+          await request(app)
+            .post("/api/auth/login")
+            .send({ email: "busy@example.com", password: "wrong-password" })
+        ).status,
+      );
+    }
+    expect(attempts).toContain(429);
+  }, 30_000);
+
   it("rejects duplicate registration, invalid email and short passwords", async () => {
     const { app } = testContext();
     const first = await request(app)

@@ -50,7 +50,11 @@ export function createApp(dependencies: ApiDependencies) {
 
   app.get("/api/health", (_request, response) => response.json({ ok: true, version: "0.1.0" }));
   app.get("/health", (_request, response) => response.json({ ok: true, version: "0.1.0" }));
-  app.use("/api/auth", limiter(20), authRouter(dependencies));
+  // Throttle credential attempts only; session checks run on every page load.
+  const credentialLimiter = limiter(20);
+  app.post("/api/auth/login", credentialLimiter);
+  app.post("/api/auth/register", credentialLimiter);
+  app.use("/api/auth", authRouter(dependencies));
 
   const requireAuth = requireAuthentication(dependencies.repositories, {
     secret: dependencies.environment.sessionSecret,
