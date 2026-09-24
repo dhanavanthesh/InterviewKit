@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": { "rootDir": "." },
-  "include": ["scripts/**/*.ts", "fixtures/sites/**/*.ts"]
+  "include": ["scripts/**/*.ts", "fixtures/sites/**/*.ts", "vitest.config.ts"]
 }

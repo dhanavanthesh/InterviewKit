@@ -2,11 +2,20 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["coverage/**", "**/dist/**", "node_modules/**", "tmp/**"] },
+  {
+    ignores: [
+      "coverage/**",
+      "**/dist/**",
+      "**/.next/**",
+      "**/next-env.d.ts",
+      "node_modules/**",
+      "tmp/**",
+    ],
+  },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
-    files: ["**/*.ts"],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -20,7 +29,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.test.ts"],
+    files: ["**/*.{test.ts,test.tsx}"],
     rules: {
       "@typescript-eslint/no-non-null-assertion": "off",
     },
@@ -37,6 +46,6 @@ export default tseslint.config(
   },
   {
     ...tseslint.configs.disableTypeChecked,
-    files: ["**/*.js"],
+    files: ["**/*.{js,mjs}"],
   },
 );
