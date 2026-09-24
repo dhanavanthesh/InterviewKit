@@ -12,6 +12,7 @@ import { FixtureLlmClient } from "../src/llm";
 import { runPipeline } from "../src/pipeline";
 import {
   generateCoveredQuestions,
+  generateFlashcards,
   planQuestionCategories,
   validateQuestionDrafts,
 } from "../src/questions";
@@ -140,6 +141,31 @@ describe("coverage generation", () => {
     });
     expect(findGaps(requirements, result.questions).all).toEqual([]);
     expect(result.questions.every(({ generated_by }) => generated_by === "fallback")).toBe(true);
+  });
+
+  it("never returns a flashcard with a blank side", async () => {
+    const llm = new FixtureLlmClient(() => ({
+      flashcards: [{ question_id: "q1", requirement_ids: ["r1"], front: "  ", back: "" }],
+    }));
+    const cards = await generateFlashcards({
+      questions: [
+        {
+          id: "q1",
+          requirement_ids: ["r1"],
+          category: "technical",
+          prompt: "How would you design a TypeScript service?",
+          answer_outline: "Cover boundaries, testing and observability.",
+          difficulty: 2,
+        },
+      ],
+      llm,
+      config,
+      budget: new KitTokenBudget(10_000),
+    });
+    expect(cards[0]).toMatchObject({
+      front: "How would you design a TypeScript service?",
+      back: "Cover boundaries, testing and observability.",
+    });
   });
 
   it("keeps zero requirements honest", async () => {

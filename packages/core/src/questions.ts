@@ -334,16 +334,18 @@ export async function generateFlashcards(input: {
   signal?: AbortSignal;
 }): Promise<Flashcard[]> {
   if (input.questions.length === 0) return [];
-  if (input.llm !== undefined && input.budget.canReserve(1000)) {
+  // Roughly 90 output tokens per card plus reasoning headroom, capped to stay inside rate limits.
+  const maxCompletionTokens = Math.min(2400, 400 + input.questions.length * 90);
+  if (input.llm !== undefined && input.budget.canReserve(maxCompletionTokens)) {
     try {
       const response = await input.llm.complete({
         model: input.config.lightModel,
         system:
-          "Create one concise study flashcard per supplied question. Copy only its real question and requirement IDs.",
+          "Create one study flashcard per supplied question. The front is a short recall prompt. The back is a concise answer of one to three sentences drawn from that question's answer outline, and is never empty. Copy only its real question and requirement IDs.",
         data: input.questions,
         schema: flashcardBatchSchema,
         schemaName: "flashcards",
-        maxCompletionTokens: 1000,
+        maxCompletionTokens,
         ...(input.signal === undefined ? {} : { signal: input.signal }),
         optional: true,
         category: "flashcards",
@@ -360,8 +362,9 @@ export async function generateFlashcards(input: {
         if (ids.length === 0) continue;
         cards.push({
           id: `f${cards.length + 1}`,
-          front: draft.front,
-          back: draft.back,
+          // A blank side from the model falls back to the source question's own text.
+          front: draft.front.trim() || question.prompt,
+          back: draft.back.trim() || question.answer_outline,
           requirement_ids: ids,
           question_id: question.id,
           origin: "generated",
