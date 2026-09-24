@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { parseConfig, type ConfigEnvironment, type PipelineConfig } from "@interview-kit/core";
 import { config as loadDotEnv } from "dotenv";
@@ -68,7 +69,9 @@ export function parseApiEnvironment(
   };
 }
 
-export function loadApiEnvironment(root = process.cwd()): ApiEnvironment {
+export function loadApiEnvironment(
+  root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.."),
+): ApiEnvironment {
   loadDotEnv({ path: path.join(root, ".env"), override: false, quiet: true });
   return parseApiEnvironment(process.env, { requireExternalServices: true });
 }

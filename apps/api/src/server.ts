@@ -3,6 +3,7 @@ import { validateUrl } from "@interview-kit/core";
 import { createApp } from "./app";
 import { closeDatabase, connectDatabase } from "./db";
 import { loadApiEnvironment } from "./env";
+import { ApiError } from "./errors";
 import { createPipelineExecutor } from "./pipeline-executor";
 import { createMongooseRepositories } from "./repositories/mongoose";
 import { JobRunner } from "./services/job-runner";
@@ -41,7 +42,12 @@ async function main(): Promise<void> {
   process.on("SIGTERM", shutdown);
 }
 
-main().catch(() => {
-  console.error("API startup failed. Check the required environment and database connection.");
+main().catch((error: unknown) => {
+  const message =
+    error instanceof ApiError &&
+    /^(Missing|Invalid) environment variables: [A-Z_, ]+\.$/.test(error.message)
+      ? error.message
+      : "API startup failed. Check the required environment and database connection.";
+  console.error(message);
   process.exitCode = 1;
 });
