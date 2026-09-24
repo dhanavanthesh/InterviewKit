@@ -296,6 +296,11 @@ describe("builder, regeneration and practice", () => {
     });
     const cardId = card.body.flashcard.id as string;
     expect(cardId).toBe("f3");
+    const unlinked = await agent
+      .patch(`/api/kits/${kitId}/flashcards/${cardId}`)
+      .send({ question_id: null });
+    expect(unlinked.status).toBe(200);
+    expect(unlinked.body.flashcard).not.toHaveProperty("question_id");
     expect(
       (
         await agent

@@ -39,6 +39,7 @@ const requirementCreateSchema = z.object({
 const requirementPatchSchema = requirementCreateSchema
   .partial()
   .refine((value) => Object.keys(value).length > 0);
+const requirementOrderSchema = z.object({ ordered_ids: z.array(z.string().min(1)) });
 const questionCreateSchema = z.object({
   prompt: z.string().trim().min(1).max(5000),
   answer_outline: text(10_000),
@@ -63,6 +64,7 @@ const flashcardCreateSchema = z.object({
 });
 const flashcardPatchSchema = flashcardCreateSchema
   .partial()
+  .extend({ question_id: z.string().min(1).nullable().optional() })
   .refine((value) => Object.keys(value).length > 0);
 const flashcardOrderSchema = z.object({ ordered_ids: z.array(z.string().min(1)) });
 const scheduleDaySchema = z
@@ -269,6 +271,34 @@ export function builderRouter(dependencies: ApiDependencies): Router {
       for (const cardId of removedCardIds)
         await dependencies.repositories.reviews.deleteForCard(owner.id, id, cardId);
       response.status(204).end();
+    }),
+  );
+
+  router.put(
+    "/:id/requirements/order",
+    asyncRoute(async (request, response) => {
+      const owner = authenticatedUser(request);
+      const { id } = parseParams(request, kitParams);
+      const body = parseBody(request, requirementOrderSchema);
+      const saved = await mutateOwnedKit(dependencies.repositories, owner.id, id, (record) => {
+        const requirements = record.kit.role.requirements;
+        exactOrder(
+          requirements.map((item) => item.id),
+          body.ordered_ids,
+        );
+        const byId = new Map(requirements.map((item) => [item.id, item]));
+        return {
+          ...record,
+          kit: {
+            ...record.kit,
+            role: {
+              ...record.kit.role,
+              requirements: body.ordered_ids.map((itemId) => byId.get(itemId)!),
+            },
+          },
+        };
+      });
+      response.json({ version: saved.version, requirements: saved.kit.role.requirements });
     }),
   );
 
@@ -495,6 +525,7 @@ export function builderRouter(dependencies: ApiDependencies): Router {
               );
         if (
           body.question_id !== undefined &&
+          body.question_id !== null &&
           !record.kit.questions.some(({ id: questionId }) => questionId === body.question_id)
         )
           throw new ApiError("KIT_INVALID", "The question ID does not exist.");
@@ -502,19 +533,25 @@ export function builderRouter(dependencies: ApiDependencies): Router {
           ...record,
           kit: {
             ...record.kit,
-            flashcards: record.kit.flashcards.map((card) =>
-              card.id === fid
-                ? {
-                    ...card,
-                    ...(body.front === undefined ? {} : { front: body.front }),
-                    ...(body.back === undefined ? {} : { back: body.back }),
-                    ...(body.question_id === undefined ? {} : { question_id: body.question_id }),
-                    ...(body.pinned === undefined ? {} : { pinned: body.pinned }),
-                    ...(requirementIds === undefined ? {} : { requirement_ids: requirementIds }),
-                    ...(substantive ? { edited: true } : {}),
-                  }
-                : card,
-            ),
+            flashcards: record.kit.flashcards.map((card) => {
+              if (card.id !== fid) return card;
+              const { question_id: _existingQuestionId, ...withoutQuestion } = card;
+              void _existingQuestionId;
+              return {
+                ...withoutQuestion,
+                ...(body.question_id === undefined && card.question_id !== undefined
+                  ? { question_id: card.question_id }
+                  : {}),
+                ...(body.front === undefined ? {} : { front: body.front }),
+                ...(body.back === undefined ? {} : { back: body.back }),
+                ...(body.question_id === undefined || body.question_id === null
+                  ? {}
+                  : { question_id: body.question_id }),
+                ...(body.pinned === undefined ? {} : { pinned: body.pinned }),
+                ...(requirementIds === undefined ? {} : { requirement_ids: requirementIds }),
+                ...(substantive ? { edited: true } : {}),
+              };
+            }),
           },
         };
       });

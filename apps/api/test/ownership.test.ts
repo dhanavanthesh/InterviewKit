@@ -12,6 +12,7 @@ describe("owner isolation", () => {
 
     const cases: Array<[string, string, unknown?]> = [
       ["get", `/api/kits/${kitId}`],
+      ["get", `/api/kits/${kitId}/job`],
       ["delete", `/api/kits/${kitId}`],
       ["get", `/api/jobs/${jobId}`],
       ["post", `/api/jobs/${jobId}/retry`],
@@ -24,6 +25,7 @@ describe("owner isolation", () => {
       ],
       ["patch", `/api/kits/${kitId}/requirements/r1`, { text: "Foreign" }],
       ["delete", `/api/kits/${kitId}/requirements/r1`],
+      ["put", `/api/kits/${kitId}/requirements/order`, { ordered_ids: ["r1", "r2"] }],
       [
         "post",
         `/api/kits/${kitId}/questions`,
@@ -112,5 +114,27 @@ describe("owner isolation", () => {
     const after = await owner.get(`/api/kits/${kitId}`);
     expect(after.body.version).toBe(before.body.version);
     expect(after.body.kit.questions).toEqual(before.body.kit.questions);
+  });
+
+  it("reorders the exact requirement set while retaining IDs and version safety", async () => {
+    const context = testContext();
+    const owner = await registerAgent(context.app);
+    const { kitId, jobId } = await createReadyKit(context, owner);
+    expect((await owner.get(`/api/kits/${kitId}/job`)).body.id).toBe(jobId);
+    const before = await owner.get(`/api/kits/${kitId}`);
+    const invalid = await owner
+      .put(`/api/kits/${kitId}/requirements/order`)
+      .send({ ordered_ids: ["r1"] });
+    expect(invalid.status).toBe(422);
+    expect((await owner.get(`/api/kits/${kitId}`)).body.version).toBe(before.body.version);
+    const reordered = await owner
+      .put(`/api/kits/${kitId}/requirements/order`)
+      .send({ ordered_ids: ["r2", "r1"] });
+    expect(reordered.status).toBe(200);
+    expect(reordered.body.version).toBe(before.body.version + 1);
+    expect(reordered.body.requirements.map((item: { id: string }) => item.id)).toEqual([
+      "r2",
+      "r1",
+    ]);
   });
 });

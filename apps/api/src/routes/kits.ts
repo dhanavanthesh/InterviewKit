@@ -172,6 +172,28 @@ export function kitsRouter(dependencies: ApiDependencies): Router {
     }),
   );
 
+  router.get(
+    "/:id/job",
+    asyncRoute(async (request, response) => {
+      const owner = authenticatedUser(request);
+      const { id } = parseParams(request, idParamsSchema);
+      const kit = await dependencies.repositories.kits.findOwned(owner.id, id);
+      if (kit === null) throw new ApiError("NOT_FOUND", "The kit was not found.");
+      const job = await dependencies.repositories.jobs.findLatestForKit(owner.id, id);
+      response.json(
+        job === null
+          ? null
+          : {
+              id: job.id,
+              kit_id: job.kitId,
+              status: job.status,
+              steps: job.steps,
+              error: job.error,
+            },
+      );
+    }),
+  );
+
   router.delete(
     "/:id",
     asyncRoute(async (request, response) => {
