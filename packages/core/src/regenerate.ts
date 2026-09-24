@@ -4,7 +4,7 @@ import {
   mergeCompanyBrief,
   mergeQuestionCategory,
 } from "@interview-kit/logic";
-import type { Kit, Question, QuestionCategory } from "@interview-kit/schema";
+import { kitSchema, type Kit, type Question, type QuestionCategory } from "@interview-kit/schema";
 
 import { validateKit } from "./assembly";
 import { crawlCompanySite } from "./crawler";
@@ -45,7 +45,7 @@ export async function regenerateSection(
   dependencies: PipelineDependencies,
 ): Promise<Kit> {
   if (request.section === "schedule") {
-    return validateKit({
+    return kitSchema.parse({
       ...kit,
       schedule: allocateSchedule({
         requirements: kit.role.requirements,
@@ -71,7 +71,7 @@ export async function regenerateSection(
       budget,
       ...(dependencies.signal === undefined ? {} : { signal: dependencies.signal }),
     });
-    return validateKit({
+    return kitSchema.parse({
       ...kit,
       company_brief: mergeCompanyBrief(
         {
