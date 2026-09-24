@@ -7,6 +7,9 @@ export interface JdLine {
 }
 
 const HEADING_WORD_LIMIT = 8;
+// Whole-line section titles that set must or nice priority even without a trailing colon.
+const PRIORITY_HEADING =
+  /^(nice[ -]to[ -]haves?|bonus(?: points)?|preferred(?: skills| experience)?|good[ -]to[ -]haves?|desirable(?: skills)?|pluses|must[ -]haves?|minimum qualifications|basic qualifications|required(?: skills| qualifications)?|what you(?:'|’)ll need)$/i;
 
 export function normalizeForComparison(value: string): string {
   return value
@@ -38,8 +41,10 @@ export function looksLikeHeading(text: string): boolean {
   }
   if (text.trim().endsWith(":")) return true;
   if (/^[A-Z][A-Z\s&/-]+$/.test(clean)) return true;
-  return /^(requirements?|qualifications?|preferred qualifications?|what you(?:'|’)ll do|responsibilities|skills|experience|about (?:you|the role)|benefits|perks|what we offer|equal opportunity)$/i.test(
-    clean,
+  return (
+    /^(requirements?|qualifications?|preferred qualifications?|what you(?:'|’)ll do|responsibilities|skills|experience|about (?:you|the role)|benefits|perks|what we offer|equal opportunity)$/i.test(
+      clean,
+    ) || PRIORITY_HEADING.test(clean)
   );
 }
 

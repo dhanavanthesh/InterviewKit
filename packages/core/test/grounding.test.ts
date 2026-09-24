@@ -34,6 +34,50 @@ describe("job description preprocessing", () => {
   });
 });
 
+describe("priority from section headings without a colon", () => {
+  const jd = [
+    "Senior Backend Engineer",
+    "",
+    "Requirements",
+    "- Strong experience with PostgreSQL and query performance tuning",
+    "",
+    "Nice to have",
+    "- Experience with ClickHouse or other analytics databases",
+    "- Mentoring junior engineers",
+  ].join("\n");
+
+  it("marks lines under a plain 'Nice to have' heading as nice even if the model says must", () => {
+    const result = groundRequirements(jd, [
+      candidate({
+        text: "PostgreSQL",
+        evidence: "Strong experience with PostgreSQL and query performance tuning",
+      }),
+      candidate({
+        text: "ClickHouse",
+        evidence: "Experience with ClickHouse or other analytics databases",
+      }),
+      candidate({ text: "Mentoring", kind: "behavioural", evidence: "Mentoring junior engineers" }),
+    ]);
+    expect(result.requirements.map(({ priority }) => priority)).toEqual(["must", "nice", "nice"]);
+  });
+
+  it("treats a plain 'Bonus points' heading as nice", () => {
+    const result = groundRequirements("Requirements\n- Go in production\nBonus points\n- Kafka", [
+      candidate({ text: "Go", evidence: "Go in production" }),
+      candidate({ text: "Kafka", evidence: "Kafka" }),
+    ]);
+    expect(result.requirements.map(({ priority }) => priority)).toEqual(["must", "nice"]);
+  });
+
+  it("keeps a must-have sentence as a requirement rather than a heading", () => {
+    const result = extractRequirementsFallback(
+      "Frontend Engineer\nMust have production React experience",
+    );
+    expect(result.requirements).toHaveLength(1);
+    expect(result.requirements[0]!.priority).toBe("must");
+  });
+});
+
 describe("requirement grounding", () => {
   it("accepts exact evidence", () => {
     const result = groundRequirements(
