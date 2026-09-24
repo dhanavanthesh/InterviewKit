@@ -14,6 +14,8 @@ Grounded requirements, company research, categorised questions, flashcards and a
 
 </div>
 
+**Live:** [69-62-84-198.sslip.io](https://69-62-84-198.sslip.io) · API health: [/api/health](https://69-62-84-198.sslip.io/api/health)
+
 [Quick start](#quick-start) · [Batch evaluator](#batch-evaluator) · [How it works](#how-it-works) ·
 [Design decisions](#design-decisions) · [Edge cases](#edge-cases) · [Deployment](#deployment)
 
@@ -253,8 +255,9 @@ Errors share one shape: `{ "error": { "code", "message", "details" } }`.
 
 ## Deployment
 
-API on Render (`render.yaml`), web on Vercel (project root `apps/web`), database on MongoDB Atlas.
-All free tiers. Set `API_ORIGIN` in Vercel before the first build. Free Render instances sleep, so
+The live instance runs on a single Linux server: nginx with a Let's Encrypt certificate in front of
+the Next.js web app and Express API under pm2, with MongoDB bound to localhost. `render.yaml`
+and a Vercel project rooted at `apps/web` are an alternative free-tier setup. Set `API_ORIGIN` in Vercel before the first build. Free Render instances sleep, so
 the first request can take a moment; the web app shows a wake-up state and retries.
 
 | Variable                                   | Used by        | Purpose                                                       |
