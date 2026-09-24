@@ -123,6 +123,57 @@ describe("section regeneration", () => {
     expect(findGaps(requirements, regenerated.questions).must).toEqual([]);
   });
 
+  it("keeps flashcards consistent when their source questions are replaced", async () => {
+    const card = (
+      id: string,
+      questionId: string,
+      extra: Partial<Kit["flashcards"][number]> = {},
+    ) => ({
+      id,
+      front: `Front ${id}`,
+      back: `Back ${id}`,
+      requirement_ids: ["r1"],
+      question_id: questionId,
+      origin: "generated" as const,
+      edited: false,
+      pinned: false,
+      generated_by: "draft" as const,
+      ...extra,
+    });
+    const kit: Kit = {
+      ...baseKit(),
+      flashcards: [
+        card("f1", "q1"),
+        card("f2", "q3"),
+        card("f3", "q1", { origin: "user", generated_by: "user" }),
+        card("f4", "q5"),
+      ],
+    };
+    const regenerated = await regenerateSection(
+      kit,
+      { section: "questions", category: "technical" },
+      dependencies(),
+    );
+    const questionIds = new Set(regenerated.questions.map(({ id }) => id));
+    expect(checkKitReferences(regenerated)).toEqual([]);
+    expect(
+      regenerated.flashcards.every(
+        (item) => item.question_id === undefined || questionIds.has(item.question_id),
+      ),
+    ).toBe(true);
+    expect(regenerated.flashcards.map(({ id }) => id)).not.toContain("f1");
+    expect(regenerated.flashcards.find(({ id }) => id === "f2")?.question_id).toBe("q3");
+    const userCard = regenerated.flashcards.find(({ id }) => id === "f3");
+    expect(userCard?.front).toBe("Front f3");
+    expect(userCard?.question_id).toBeUndefined();
+    expect(regenerated.flashcards.find(({ id }) => id === "f4")?.question_id).toBe("q5");
+    const added = regenerated.questions.filter(({ id }) => !kit.questions.some((q) => q.id === id));
+    for (const question of added) {
+      expect(regenerated.flashcards.some((item) => item.question_id === question.id)).toBe(true);
+    }
+    expect(regenerated.flashcards.every(({ back }) => back.trim().length > 0)).toBe(true);
+  });
+
   it("recomputes an exact deterministic schedule without changing questions", async () => {
     const kit = baseKit();
     const regenerated = await regenerateSection(kit, { section: "schedule" }, dependencies());

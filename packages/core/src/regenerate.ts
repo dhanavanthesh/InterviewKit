@@ -4,7 +4,13 @@ import {
   mergeCompanyBrief,
   mergeQuestionCategory,
 } from "@interview-kit/logic";
-import { kitSchema, type Kit, type Question, type QuestionCategory } from "@interview-kit/schema";
+import {
+  kitSchema,
+  type Flashcard,
+  type Kit,
+  type Question,
+  type QuestionCategory,
+} from "@interview-kit/schema";
 
 import { validateKit } from "./assembly";
 import { crawlCompanySite } from "./crawler";
@@ -28,6 +34,36 @@ function requirementsForCategory(kit: Kit, category: QuestionCategory) {
   if (category === "company-fit")
     return kit.role.requirements.filter(({ kind }) => kind === "behavioural" || kind === "domain");
   return kit.role.requirements.filter(({ kind }) => kind === "technical" || kind === "domain");
+}
+
+// Replaced questions take their untouched generated cards with them; kept cards lose only the stale link.
+function reconcileFlashcards(kit: Kit, questions: readonly Question[]): Flashcard[] {
+  const questionIds = new Set(questions.map(({ id }) => id));
+  const kept = kit.flashcards.flatMap((card): Flashcard[] => {
+    if (card.question_id === undefined || questionIds.has(card.question_id)) return [card];
+    if (card.origin !== "user" && card.edited !== true && card.pinned !== true) return [];
+    const unlinked: Flashcard = { ...card };
+    delete unlinked.question_id;
+    return [unlinked];
+  });
+  const originalIds = new Set(kit.questions.map(({ id }) => id));
+  const linked = new Set(kept.map(({ question_id }) => question_id));
+  let next =
+    Math.max(0, ...kit.flashcards.map(({ id }) => Number(/^f(\d+)$/.exec(id)?.[1] ?? 0))) + 1;
+  const added = questions
+    .filter(({ id }) => !originalIds.has(id) && !linked.has(id))
+    .map((question): Flashcard => ({
+      id: `f${next++}`,
+      front: question.prompt,
+      back: question.answer_outline.trim() || question.prompt,
+      requirement_ids: [...question.requirement_ids],
+      question_id: question.id,
+      origin: "generated",
+      edited: false,
+      pinned: false,
+      generated_by: "fallback",
+    }));
+  return [...kept, ...added];
 }
 
 function closeCoverage(kit: Kit, questions: Question[]): Question[] {
@@ -119,15 +155,17 @@ export async function regenerateSection(
     nextQuestionNumber: nextQuestionNumber(kit.questions),
   });
   const questions = closeCoverage(kit, merged.questions);
+  const flashcards = reconcileFlashcards(kit, questions);
   const schedule = allocateSchedule({
     requirements: kit.role.requirements,
     questions,
-    flashcards: kit.flashcards,
+    flashcards,
     daysAvailable: kit.schedule.days_available,
   });
   return validateKit({
     ...kit,
     questions,
+    flashcards,
     schedule,
     coverage: {
       ...kit.coverage,
